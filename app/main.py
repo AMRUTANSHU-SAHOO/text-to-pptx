@@ -51,4 +51,22 @@ async def generate(
                     hx = ''.join([c*2 for c in hx])
                 brand_rgb = tuple(int(hx[i:i+2], 16) for i in (0, 2, 4))
 
-        prs = build_presentation(text=text, mode=mode, template_path=tem
+        prs = build_presentation(text=text, mode=mode, template_path=template_path, brand_rgb=brand_rgb)
+        bio = io.BytesIO()
+        prs.save(bio)
+        bio.seek(0)
+
+        fname = safe_filename(filename or "My Presentation") + ".pptx"
+        return StreamingResponse(
+            bio,
+            media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            headers={"Content-Disposition": f"attachment; filename=\"{fname}\""},
+            background=BackgroundTask(lambda: None)
+        )
+    finally:
+        # Clean temp upload if present
+        if template_path and os.path.exists(template_path):
+            try:
+                os.remove(template_path)
+            except Exception:
+                pass
