@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.background import BackgroundTask
 from typing import Optional
-import io, os
+import io, os, tempfile
 
 from .pptx_builder import build_presentation, parse_markdown, parse_text
 from .utils import safe_filename
@@ -38,7 +38,8 @@ async def generate(
             ext = os.path.splitext(template.filename)[1].lower()
             if ext not in {".pptx", ".potx"}:
                 return JSONResponse({"error": "Template must be .pptx or .potx"}, status_code=400)
-            tmp = f"/tmp/uploaded{ext}"
+            tmpdir = tempfile.gettemodir()
+            tmp = os.path.join(tempdir, f"uploaded{ext}")
             with open(tmp, "wb") as out:
                 out.write(await template.read())
             template_path = tmp
