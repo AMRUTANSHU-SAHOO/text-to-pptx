@@ -38,8 +38,8 @@ async def generate(
             ext = os.path.splitext(template.filename)[1].lower()
             if ext not in {".pptx", ".potx"}:
                 return JSONResponse({"error": "Template must be .pptx or .potx"}, status_code=400)
-            tmpdir = tempfile.gettemodir()
-            tmp = os.path.join(tempdir, f"uploaded{ext}")
+            tmpdir = tempfile.gettempdir()
+            tmp = os.path.join(tmpdir, f"uploaded{ext}")
             with open(tmp, "wb") as out:
                 out.write(await template.read())
             template_path = tmp
